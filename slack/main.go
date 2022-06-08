@@ -80,10 +80,11 @@ func (s *slackNotifier) SendNotification(ctx context.Context, build *cbpb.Build)
 
 func (s *slackNotifier) writeMessage(build *cbpb.Build) (*slack.WebhookMessage, error) {
 	txt := fmt.Sprintf(
-		"Cloud Build (%s, %s): %s",
+		"ProjectId: %s\nTriggerName: %s\nStatus: %s\nDuration: %s",
 		build.ProjectId,
-		build.Id,
+		build.Substitutions["TRIGGER_NAME"],
 		build.Status,
+		build.FinishTime.AsTime().Sub(build.StartTime.AsTime()),
 	)
 
 	var clr string
@@ -111,5 +112,9 @@ func (s *slackNotifier) writeMessage(build *cbpb.Build) (*slack.WebhookMessage, 
 		}},
 	}
 
-	return &slack.WebhookMessage{Attachments: []slack.Attachment{atch}}, nil
+	return &slack.WebhookMessage{
+		Username:    "Cloud Build",
+		IconEmoji:   ":cloudbuild:",
+		Attachments: []slack.Attachment{atch},
+	}, nil
 }

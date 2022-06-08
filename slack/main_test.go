@@ -15,6 +15,9 @@ func TestWriteMessage(t *testing.T) {
 		Id:        "some-build-id",
 		Status:    cbpb.Build_SUCCESS,
 		LogUrl:    "https://some.example.com/log/url?foo=bar",
+		Substitutions: map[string]string{
+			"TRIGGER_NAME": "trigger",
+		},
 	}
 
 	got, err := n.writeMessage(b)
@@ -23,8 +26,10 @@ func TestWriteMessage(t *testing.T) {
 	}
 
 	want := &slack.WebhookMessage{
+		Username:  "Cloud Build",
+		IconEmoji: ":cloudbuild:",
 		Attachments: []slack.Attachment{{
-			Text:  "Cloud Build (my-project-id, some-build-id): SUCCESS",
+			Text:  "ProjectId: my-project-id\nTriggerName: trigger\nStatus: SUCCESS\nDuration: 0s",
 			Color: "good",
 			Actions: []slack.AttachmentAction{{
 				Text: "View Logs",
